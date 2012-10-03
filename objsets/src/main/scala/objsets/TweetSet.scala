@@ -31,7 +31,17 @@ abstract class TweetSet {
     
 
   // Hint: the method "remove" on TweetSet will be very useful.
-  def ascendingByRetweet: Trending = ???
+  def ascendingByRetweet: Trending = {
+    def iter(tweets: TweetSet, acc : Trending) : Trending = {
+      if(tweets.isEmpty) acc
+      else {
+    	  val min = tweets.findMin
+    	  iter(tweets.remove(min), acc + min)
+      }
+    }
+    iter(this, new EmptyTrending)
+  }
+    
 
   // The following methods are provided for you, and do not have to be changed
   // -------------------------------------------------------------------------
