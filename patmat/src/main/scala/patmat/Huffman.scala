@@ -156,23 +156,16 @@ object Huffman {
   def decode(tree: CodeTree, bits: List[Bit]): List[Char] = {
 
     def iter(_tree: CodeTree, bits: List[Bit], chars: List[Char]): List[Char] = {
-      if (bits.isEmpty) chars
-      else
-        bits.head match {
-          case 0 => {
-            _tree match {
-              case Fork(left, _, _, _) => iter(left, bits.tail, chars)
-              case Leaf(char, _) => iter(tree, bits, char :: chars)
-            }
-          }
-
-          case 1 => {
-            _tree match {
-              case Fork(_, right, _, _) => iter(right, bits.tail, chars)
-              case Leaf(char, _) => iter(tree, bits, char :: chars)
-            }
+      _tree match {
+        case Fork(left, right, _, _) => {
+          bits.head match {
+            case 0 => iter(left, bits.tail, chars)
+            case 1 => iter(right, bits.tail, chars)
           }
         }
+        case Leaf(char, _) if bits.isEmpty => char :: chars
+        case Leaf(char, _) => iter(tree, bits, char :: chars)
+      }
     }
 
     iter(tree, bits, List()).reverse
