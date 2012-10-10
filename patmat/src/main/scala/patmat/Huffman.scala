@@ -139,7 +139,11 @@ object Huffman {
    * The parameter `chars` is an arbitrary text. This function extracts the character
    * frequencies from that text and creates a code tree based on them.
    */
-  def createCodeTree(chars: List[Char]): CodeTree = ???
+  def createCodeTree(chars: List[Char]): CodeTree = {
+    val freqs = times(chars)
+    val ordered = makeOrderedLeafList(freqs)
+    until(singleton, combine)(ordered).head
+  }
 
   // Part 3: Decoding
 
@@ -149,7 +153,30 @@ object Huffman {
    * This function decodes the bit sequence `bits` using the code tree `tree` and returns
    * the resulting list of characters.
    */
-  def decode(tree: CodeTree, bits: List[Bit]): List[Char] = ???
+  def decode(tree: CodeTree, bits: List[Bit]): List[Char] = {
+
+    def iter(_tree: CodeTree, bits: List[Bit], chars: List[Char]): List[Char] = {
+      if (bits.isEmpty) chars
+      else
+        bits.head match {
+          case 0 => {
+            _tree match {
+              case Fork(left, _, _, _) => iter(left, bits.tail, chars)
+              case Leaf(char, _) => iter(tree, bits, char :: chars)
+            }
+          }
+
+          case 1 => {
+            _tree match {
+              case Fork(_, right, _, _) => iter(right, bits.tail, chars)
+              case Leaf(char, _) => iter(tree, bits, char :: chars)
+            }
+          }
+        }
+    }
+
+    iter(tree, bits, List()).reverse
+  }
 
   /**
    * A Huffman coding tree for the French language.
@@ -167,7 +194,8 @@ object Huffman {
   /**
    * Write a function that returns the decoded secret
    */
-  def decodedSecret: List[Char] = ???
+  def decodedSecret: List[Char] =
+    decode(frenchCode, secret)
 
   // Part 4a: Encoding using Huffman tree
 
@@ -211,4 +239,46 @@ object Huffman {
    * and then uses it to perform the actual encoding.
    */
   def quickEncode(tree: CodeTree)(text: List[Char]): List[Bit] = ???
+
+  object DotBuilder {
+
+    def name(node: CodeTree): String = node match {
+      case Fork(_, _, chars, _) => chars.map(x => "" + x + " ").reduce(_ + _).dropRight(1)
+      case Leaf(chars, _) => chars.toString
+    }
+
+    def attrs(node: CodeTree): String = node match {
+      case f: Fork => "[label=\"" + label(node) + "\"]"
+      case l: Leaf => "[shape=box, label=\"" + label(node) + "\"]"
+    }
+
+    def label(node: CodeTree): String = node match {
+      case Fork(_, _, _, w) => name(node) + " (" + w + ")"
+      case Leaf(_, w) => name(node) + " (" + w + ")"
+    }
+
+    def visit(node: CodeTree): Unit = {
+      val nm = name(node)
+      println("  \"" + nm + "\" " + attrs(node));
+      node match {
+        case Fork(left, right, _, weight) => {
+          visit(left)
+          visit(right)
+          println("  \"" + nm + "\" -> \"" + name(left) + "\" [label=0]");
+          println("  \"" + nm + "\" -> \"" + name(right) + "\" [label=1]");
+        }
+        case _ =>
+      }
+    }
+
+    def generate(tree: CodeTree) = {
+      println("digraph g {");
+      visit(tree)
+      println("}");
+    }
+
+    def main(args: Array[String]) {
+      generate(createCodeTree(string2Chars("helloworld")))
+    }
+  }
 }

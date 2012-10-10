@@ -28,7 +28,7 @@ class HuffmanSuite extends FunSuite {
 
   test("charCount") {
     val data = times(List('a', 'a', 'b', 'a'))
-    assert(data == List(('a', 3), ('b', 1)), "charCount")
+    assert(data === List(('a', 3), ('b', 1)), "charCount")
   }
 
   test("string2chars(\"hello, world\")") {
@@ -45,8 +45,14 @@ class HuffmanSuite extends FunSuite {
   }
 
   test("until of some leaf list") {
-    val leaflist = List(Leaf('e', 1), Leaf('t', 2), Leaf('x', 3))
-    assert(until(singleton, combine)(leaflist) === List(Fork(Leaf('x', 3), Fork(Leaf('t', 2), Leaf('e', 1), List('e', 't'), 3), List('e', 't', 'x'), 6)))
+    val leaflist = List(Leaf('e', 1), Leaf('t', 2), Leaf('x', 4))
+    val untilList = until(singleton, combine)(leaflist)
+    assert(untilList === List(Fork(Leaf('x', 4), Fork(Leaf('e', 1), Leaf('t', 2), List('e', 't'), 3), List('e', 't', 'x'), 7)))
+  }
+
+  test("Test the secret") {
+    val secret = decodedSecret
+    assert(secret === string2Chars("huffmanestcool"))
   }
 
   test("decode and encode a very short text should be identity") {
