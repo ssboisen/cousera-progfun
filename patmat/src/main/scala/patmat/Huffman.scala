@@ -105,12 +105,11 @@ object Huffman {
    * unchanged.
    */
   def combine(trees: List[CodeTree]): List[CodeTree] =
-    if (trees.isEmpty || singleton(trees)) trees
-    else {
-      val n1 = trees.take(2).head
-      val n2 = trees.take(2).tail.head
-      (makeCodeTree(n1, n2) :: trees.drop(2)).sortBy(t => weight(t))
-    }
+      trees match {
+        case first :: second :: rest => (makeCodeTree(first, second) :: rest).sortBy(t => weight(t))
+        case _ => trees
+      }
+    
 
   /**
    * This function will be called in the following way:
