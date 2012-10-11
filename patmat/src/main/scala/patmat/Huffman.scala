@@ -199,27 +199,18 @@ object Huffman {
   def encode(tree: CodeTree)(text: List[Char]): List[Bit] = {
     def hasCharInBranch(tree: CodeTree, c: Char) = {
       tree match {
-        case Fork(_, _, cs, _) => {
-          cs.contains(c)
-        }
+        case Fork(_, _, cs, _) => cs.contains(c)
         case Leaf(char, _) => char == c
-        case _ => false
       }
     }
     def iter(_tree: CodeTree, chars: List[Char], bits: List[Bit]): List[Bit] = {
       if (chars.isEmpty) bits
       else
         _tree match {
-          case Fork(left, _, _, _) if hasCharInBranch(left, chars.head) => {
-            iter(left, chars, 0 :: bits)
-          }
-          case Fork(_, right, _, _) if hasCharInBranch(right, chars.head) => {
-            iter(right, chars, 1 :: bits)
-          }
+          case Fork(left, _, _, _) if hasCharInBranch(left, chars.head) => iter(left, chars, 0 :: bits)
+          case Fork(_, right, _, _) if hasCharInBranch(right, chars.head) => iter(right, chars, 1 :: bits)
           case Leaf(c, _) if c == chars.head => iter(tree, chars.tail, bits)
-          case _ => {
-            iter(tree, chars, bits)
-          }
+          case _ => iter(tree, chars, bits)
         }
     }
     iter(tree, text, List()).reverse
