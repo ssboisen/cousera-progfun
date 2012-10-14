@@ -105,11 +105,12 @@ object Huffman {
    * unchanged.
    */
   def combine(trees: List[CodeTree]): List[CodeTree] =
-      trees match {
-        case first :: second :: rest => (makeCodeTree(first, second) :: rest).sortBy(t => weight(t))
-        case _ => trees
-      }
-    
+    if (trees.isEmpty || singleton(trees)) trees
+    else {
+      val n1 = trees.take(2).head
+      val n2 = trees.take(2).tail.head
+      (makeCodeTree(n1, n2) :: trees.drop(2)).sortBy(t => weight(t))
+    }
 
   /**
    * This function will be called in the following way:
@@ -153,21 +154,20 @@ object Huffman {
    * the resulting list of characters.
    */
   def decode(tree: CodeTree, bits: List[Bit]): List[Char] = {
-
-    def iter(_tree: CodeTree, bits: List[Bit], chars: List[Char]): List[Char] = {
+    def doDecode(_tree: CodeTree, bits: List[Bit]): List[Char] = {
       _tree match {
         case Fork(left, right, _, _) => {
           bits.head match {
-            case 0 => iter(left, bits.tail, chars)
-            case 1 => iter(right, bits.tail, chars)
+            case 0 => doDecode(left, bits.tail)
+            case 1 => doDecode(right, bits.tail)
           }
         }
-        case Leaf(char, _) if bits.isEmpty => char :: chars
-        case Leaf(char, _) => iter(tree, bits, char :: chars)
+        case Leaf(char, _) if bits.isEmpty => List(char)
+        case Leaf(char, _) => char :: doDecode(tree, bits)
       }
     }
 
-    iter(tree, bits, List()).reverse
+    doDecode(tree, bits)
   }
 
   /**
