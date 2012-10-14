@@ -202,22 +202,20 @@ object Huffman {
         case Leaf(char, _) => char == c
       }
     }
-    def iter(_tree: CodeTree, chars: List[Char], bits: List[Bit]): List[Bit] = {
-      if (chars.isEmpty) bits
+    def iter(_tree: CodeTree, chars: List[Char]): List[Bit] = {
+      if (chars.isEmpty) List()
       else
         _tree match {
           case Fork(left, right, _, _) =>
             if (hasCharInBranch(left, chars.head))
-              iter(left, chars, 0 :: bits)
-            else if (hasCharInBranch(right, chars.head))
-              iter(right, chars, 1 :: bits)
+              0 :: iter(left, chars)
             else
-              iter(tree, chars, bits)
+              1 :: iter(right, chars)
 
-          case Leaf(c, _) => iter(tree, chars.tail, bits)
+          case Leaf(c, _) => iter(tree, chars.tail)
         }
     }
-    iter(tree, text, List()).reverse
+    iter(tree, text)
   }
 
   // Part 4b: Encoding using code table
