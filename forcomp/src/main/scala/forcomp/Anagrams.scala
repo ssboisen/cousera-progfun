@@ -60,12 +60,12 @@ object Anagrams {
    *
    */
   lazy val dictionaryByOccurrences: Map[Occurrences, List[Word]] =
-    loadDictionary.groupBy(w => wordOccurrences(w))
+    dictionary.groupBy(w => wordOccurrences(w))
 
   /** Returns all the anagrams of a given word. */
   def wordAnagrams(word: Word): List[Word] =
     dictionaryByOccurrences.get(wordOccurrences(word)) match {
-      case Some(ol) => ol
+      case Some(anagrams) => anagrams
       case _ => List()
     }
 
@@ -92,7 +92,16 @@ object Anagrams {
    *  Note that the order of the occurrence list subsets does not matter -- the subsets
    *  in the example above could have been displayed in some other order.
    */
-  def combinations(occurrences: Occurrences): List[Occurrences] = ???
+  def combinations(occurrences: Occurrences): List[Occurrences] = {
+    def powerset[A](s: Set[A]) = s.foldLeft(Set(Set.empty[A])) { case (ss, el) => ss ++ ss.map(_ + el) }
+
+    val set = for {
+      o <- occurrences
+      i <- 1 to o._2
+    } yield (o._1, i)
+
+    powerset(set.toSet).map(x => x.toList).filterNot(l => l.groupBy(c => c._1).exists(x => x._2.length > 1)).toList
+  }
 
   /**
    * Subtracts occurrence list `y` from occurrence list `x`.
