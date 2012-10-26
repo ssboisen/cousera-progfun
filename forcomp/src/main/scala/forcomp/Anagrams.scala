@@ -93,14 +93,14 @@ object Anagrams {
    *  in the example above could have been displayed in some other order.
    */
   def combinations(occurrences: Occurrences): List[Occurrences] = {
-    def powerset[A](s: Set[A]) = s.foldLeft(Set(Set.empty[A])) { case (ss, el) => ss ++ ss.map(_ + el) }
-
     val set = for {
-      o <- occurrences
-      i <- 1 to o._2
-    } yield (o._1, i)
+      (char, freq) <- occurrences
+      i <- 1 to freq
+    } yield (char, i)
 
-    powerset(set.toSet).map(x => x.toList).filterNot(l => l.groupBy(c => c._1).exists(x => x._2.length > 1)).toList
+    set.foldLeft(List[Occurrences](List())) {
+      case (ss, (char, freq)) => ss ++ ss.filterNot(_ exists { case (c, _) => c == char }).map(_ ++ List((char, freq)))
+    }
   }
 
   /**
