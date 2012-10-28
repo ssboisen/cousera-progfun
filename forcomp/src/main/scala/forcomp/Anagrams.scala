@@ -41,7 +41,10 @@ object Anagrams {
 
   /** Converts a sentence into its character occurrence list. */
   def sentenceOccurrences(s: Sentence): Occurrences =
-    wordOccurrences(s.reduce(_ + _))
+    if (s.isEmpty)
+      List()
+    else
+      wordOccurrences(s.reduce(_ + _))
 
   /**
    * The `dictionaryByOccurrences` is a `Map` from different occurrences to a sequence of all
@@ -93,14 +96,15 @@ object Anagrams {
    *  in the example above could have been displayed in some other order.
    */
   def combinations(occurrences: Occurrences): List[Occurrences] = {
-    val set = for {
-      (char, freq) <- occurrences
-      i <- 1 to freq
-    } yield (char, i)
-
-    set.foldLeft(List[Occurrences](List())) {
-      case (ss, (char, freq)) => ss ++ ss.filterNot(_ exists { case (c, _) => c == char }).map(_ ++ List((char, freq)))
-    }
+    if (occurrences.isEmpty)
+      List(List())
+    else
+      (for {
+        comb <- combinations(occurrences.tail)
+        (char, freq) = occurrences.head
+        i <- 1 to freq
+        c <- List(List((char, i)), (char, i) :: comb)
+      } yield c) ++ combinations(occurrences.tail)
   }
 
   /**
@@ -163,6 +167,21 @@ object Anagrams {
    *
    *  Note: There is only one anagram of an empty sentence.
    */
-  def sentenceAnagrams(sentence: Sentence): List[Sentence] = ???
+  def sentenceAnagrams(sentence: Sentence): List[Sentence] = {
+    return Nil
+    if (sentence.isEmpty)
+      List(List())
+    else {
+      val temp = for {
+        comb <- combinations(sentenceOccurrences(sentence))
+        if (!comb.isEmpty)
+        s = subtract(comb, comb.tail)
+        w = dictionaryByOccurrences.get(s)
+        if (!w.isEmpty)
+        rest <- sentenceAnagrams(sentence.tail)
+      } yield w.get :: rest
+      Nil
+    }
+  }
 
 }
