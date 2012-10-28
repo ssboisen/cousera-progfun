@@ -96,15 +96,11 @@ object Anagrams {
    *  in the example above could have been displayed in some other order.
    */
   def combinations(occurrences: Occurrences): List[Occurrences] = {
-    if (occurrences.isEmpty)
-      List(List())
-    else
-      (for {
-        comb <- combinations(occurrences.tail)
-        (char, freq) = occurrences.head
-        i <- 1 to freq
-        c <- List(List((char, i)), (char, i) :: comb)
-      } yield c) ++ combinations(occurrences.tail)
+    val set = for {
+      (char, freq) <- occurrences
+      i <- 1 to freq
+    } yield (char, i)
+    set.foldLeft(List[Occurrences](List())) { case (ss, el) => ss ++ ss.filterNot(_.exists(_._1 == el._1)).map(_ ++ List(el)) }
   }
 
   /**
@@ -118,13 +114,15 @@ object Anagrams {
    *  Note: the resulting value is an occurrence - meaning it is sorted
    *  and has no zero-entries.
    */
-  def subtract(x: Occurrences, y: Occurrences): Occurrences =
+  def subtract(x: Occurrences, y: Occurrences): Occurrences = {
+    val yMap = y.toMap.withDefaultValue(0)
     for {
       (char, freq) <- x
-      (_, yFreq) = y.find(_._1 == char).getOrElse((char, 0))
+      yFreq = yMap(char)
       o = (char, freq - yFreq)
       if (o._2 > 0)
     } yield o
+  }
 
   /**
    * Returns a list of all anagram sentences of the given sentence.
@@ -168,20 +166,18 @@ object Anagrams {
    *  Note: There is only one anagram of an empty sentence.
    */
   def sentenceAnagrams(sentence: Sentence): List[Sentence] = {
-    return Nil
-    if (sentence.isEmpty)
-      List(List())
-    else {
-      val temp = for {
-        comb <- combinations(sentenceOccurrences(sentence))
-        if (!comb.isEmpty)
-        s = subtract(comb, comb.tail)
-        w = dictionaryByOccurrences.get(s)
-        if (!w.isEmpty)
-        rest <- sentenceAnagrams(sentence.tail)
-      } yield w.get :: rest
-      Nil
-    }
+    def findAnagrams(occurances: Occurrences): List[Sentence] =
+      {
+        if (occurances.isEmpty)
+          List(List())
+        else
+          for {
+            comb <- combinations(occurances)
+            word <- dictionaryByOccurrences.get(comb).getOrElse(List())
+            rest <- findAnagrams(subtract(occurances, comb))
+          } yield word :: rest
+      }
+    findAnagrams(sentenceOccurrences(sentence))
   }
 
 }
