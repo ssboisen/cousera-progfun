@@ -67,11 +67,10 @@ trait StringParserTerrain extends GameDef {
    * Hint: you can use the functions `indexWhere` and / or `indexOf` of the
    * `Vector` class
    */
-  def findChar(c: Char, levelVector: Vector[Vector[Char]]): Pos = {
-    val yIndex = levelVector.indexWhere(_ contains c)
-    val xIndex = levelVector(yIndex).indexOf(c)
-    Pos(xIndex, yIndex)
-  }
+  def findChar(c: Char, levelVector: Vector[Vector[Char]]): Pos =
+    levelVector.view.zipWithIndex
+      .map { case (v, i) => Pos(i, v.indexOf(c)) }
+      .find { case Pos(_, y) => y != -1 }.get
 
   private lazy val vector: Vector[Vector[Char]] =
     Vector(level.split("\n").map(str => Vector(str: _*)): _*)
