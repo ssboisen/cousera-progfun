@@ -17,20 +17,21 @@ class BloxorzSuite extends FunSuite {
      * is a valid solution, i.e. leads to the goal.
      */
     def solve(ls: List[Move]): Block =
-      ls.foldLeft(startBlock) { case (block, move) => move match {
-        case Left => block.left
-        case Right => block.right
-        case Up => block.up
-        case Down => block.down
+      ls.foldLeft(startBlock) {
+        case (block, move) => move match {
+          case Left => block.left
+          case Right => block.right
+          case Up => block.up
+          case Down => block.down
+        }
       }
-    }
   }
 
   trait Level1 extends SolutionChecker {
-      /* terrain for level 1*/
+    /* terrain for level 1*/
 
     val level =
-    """ooo-------
+      """ooo-------
       |oSoooo----
       |ooooooooo-
       |-ooooooooo
@@ -42,14 +43,14 @@ class BloxorzSuite extends FunSuite {
 
   test("terrain function level 1") {
     new Level1 {
-      assert(terrain(Pos(0,0)), "0,0")
-      assert(!terrain(Pos(4,11)), "4,11")
+      assert(terrain(Pos(0, 0)), "0,0")
+      assert(!terrain(Pos(4, 11)), "4,11")
     }
   }
 
   test("findChar level 1") {
     new Level1 {
-      assert(startPos == Pos(1,1))
+      assert(startPos == Pos(1, 1))
     }
   }
 
