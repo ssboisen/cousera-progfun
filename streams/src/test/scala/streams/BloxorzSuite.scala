@@ -44,7 +44,9 @@ class BloxorzSuite extends FunSuite {
   test("terrain function level 1") {
     new Level1 {
       assert(terrain(Pos(0, 0)), "0,0")
+      assert(!terrain(Pos(0, 3)), "0,3")
       assert(!terrain(Pos(4, 11)), "4,11")
+      assert(!terrain(Pos(5, 0)), "5,0")
     }
   }
 
@@ -80,13 +82,13 @@ class BloxorzSuite extends FunSuite {
 
   test("optimal solution for level 1") {
     new Level1 {
-      assert(solve(solution) == Block(goal, goal))
+      assert(solve(solution) === Block(goal, goal))
     }
   }
 
   test("optimal solution length for level 1") {
     new Level1 {
-      assert(solution.length == optsolution.length)
+      assert(solution.length === optsolution.length)
     }
   }
 }

@@ -65,8 +65,15 @@ trait Solver extends GameDef {
    * construct the correctly sorted stream.
    */
   def from(initial: Stream[(Block, List[Move])],
-    explored: Set[Block]): Stream[(Block, List[Move])] =
-    initial
+    explored: Set[Block]): Stream[(Block, List[Move])] = {
+    initial match {
+      case (block, moves) #:: rest =>
+        {
+          val newNeighbors = newNeighborsOnly(neighborsWithHistory(block, moves), explored)
+          newNeighbors.append(from(rest.append(newNeighbors), explored + block))
+        }
+    }
+  }
 
   /**
    * The stream of all paths that begin at the starting block.
@@ -79,7 +86,7 @@ trait Solver extends GameDef {
    * with the history how it was reached.
    */
   lazy val pathsToGoal: Stream[(Block, List[Move])] =
-    pathsFromStart.filter { case (block, moves) => done(block) }
+    pathsFromStart.filter { case (block, _) => done(block) }
 
   /**
    * The (or one of the) shortest sequence(s) of moves to reach the
@@ -89,6 +96,10 @@ trait Solver extends GameDef {
    * the first move that the player should perform from the starting
    * position.
    */
-  lazy val solution: List[Move] =
-    pathsToGoal.map(_._2).head.reverse
+  lazy val solution: List[Move] = {
+    pathsToGoal.map(_._2) match {
+      case h #:: _ => h.reverse
+      case _ => List()
+    }
+  }
 }
